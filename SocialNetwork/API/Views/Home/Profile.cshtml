@@ -1,0 +1,36 @@
+﻿@model ProfileInfoViewModel
+@{
+	Layout = "_Layout";
+}
+
+<h1>Информация о пользователе</h1>
+<table class="table table-striped table-bordered">
+	<tr>
+		<td>@Html.DisplayNameFor(m => m.Name)</td>
+		<td>@Model.Name</td>
+	</tr>
+	<tr>
+		<td>@Html.DisplayNameFor(m => m.Surname)</td>
+		<td>@Model.Surname</td>
+	</tr>
+	<tr>
+		<td>@Html.DisplayNameFor(m => m.Patronymic)</td>
+		<td>@(Model.Patronymic ?? "Нет")</td>
+	</tr>
+	<tr>
+		<td>@Html.DisplayNameFor(m => m.Country)</td>
+		<td>@Model.Country</td>
+	</tr>
+	<tr>
+		<td>@Html.DisplayNameFor(m => m.City)</td>
+		<td>@Model.City</td>
+	</tr>
+	<tr>
+		<td>@Html.DisplayNameFor(m => m.BirthDate)</td>
+		<td>@Model.BirthDate</td>
+	</tr>
+	<tr>
+		<td>@Html.DisplayNameFor(m => m.Gender)</td>
+		<td>@Model.Gender</td>
+	</tr>
+</table>

@@ -1,0 +1,4 @@
+﻿.btn-group {
+    display: flex;
+    gap: 10px;
+}
