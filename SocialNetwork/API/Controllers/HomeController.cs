@@ -1,6 +1,7 @@
 ﻿using Application.Services;
 using Logic.Models;
 using Logic.ViewModels;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace API.Controllers
@@ -19,9 +20,10 @@ namespace API.Controllers
 			return View();
 		}
 
+		[Authorize]
 		public async Task<IActionResult> Profile(string? id = null)
 		{
-			User user; // заменить на viewmodel какую нибудь
+			User user; 
 			if (id is null)
 			{
 				user = await userService.GetAuthUserInfo(User);

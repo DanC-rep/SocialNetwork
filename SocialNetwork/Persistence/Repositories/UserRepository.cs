@@ -3,6 +3,7 @@ using Logic.Interfaces;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using System.Security.Claims;
+using Logic.ViewModels;
 
 namespace Persistence.Repositories
 {
@@ -17,35 +18,37 @@ namespace Persistence.Repositories
 			userManager = usrMgr;
 		}
 
-		public async Task Delete(string id)
+		public async Task<IdentityResult> Delete(string id)
 		{
-			var user = await context.Users.SingleOrDefaultAsync(u => u.Id == id);
+			var user = await userManager.FindByIdAsync(id);
 
 			if (user != null)
 			{
-				context.Users.Remove(user);
-				await context.SaveChangesAsync();
+				return await userManager.DeleteAsync(user);
 			}
+
+			return IdentityResult.Failed();
 		}
 
-		public async Task Edit(User user)
+		public async Task<IdentityResult> Edit(EditProfileViewModel user)
 		{
-			var dbEntry = await context.Users.SingleOrDefaultAsync(u => u.Id == user.Id);
+			var dbEntry = await userManager.FindByIdAsync(user.Id);
 
 			if (dbEntry != null)
 			{
-				dbEntry.UserName = user.UserName;
-				dbEntry.PhoneNumber = user.PhoneNumber;
 				dbEntry.Name = user.Name;
 				dbEntry.Surname = user.Surname;
 				dbEntry.Patronymic = user.Patronymic;
 				dbEntry.City = user.City;
 				dbEntry.Country = user.Country;
-				dbEntry.BirthDate = user.BirthDate;
+				dbEntry.BirthDate = user.BirthDate.GetValueOrDefault();
 				dbEntry.Gender = user.Gender;
 
-				// прописать смену пароля (наверное отдельным методом)
+				return await userManager.UpdateAsync(dbEntry);
+				// TODO: Прописать смену пароля (наверное отдельным методом)
 			}
+
+			return IdentityResult.Failed();
 		}
 
 		public async Task<User> GetByEmail(string email)
@@ -61,6 +64,26 @@ namespace Persistence.Repositories
 		public async Task<User> GetAuthUserInfo(ClaimsPrincipal user)
 		{
 			return await userManager.GetUserAsync(user);
+		}
+
+		public IEnumerable<User> GetAllUsers()
+		{
+			return userManager.Users;
+		}
+
+		public async Task<IList<string>> GetUserRoles(User user)
+		{
+			return await userManager.GetRolesAsync(user);
+		}
+
+		public async Task AddUserToRoles(User user, IEnumerable<string> roles)
+		{
+			await userManager.AddToRolesAsync(user, roles);
+		}
+
+		public async Task RemoveUserFromRoles(User user, IEnumerable<string> roles)
+		{
+			await userManager.RemoveFromRolesAsync(user, roles);
 		}
 	}
 }

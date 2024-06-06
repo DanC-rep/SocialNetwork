@@ -1,0 +1,31 @@
+﻿@model IEnumerable<User>
+@{
+	Layout = "_Layout";
+}
+
+<h1>Список пользователей</h1>
+<div>
+	<a class="btn btn-lg btn-outline-primary" asp-action="Register" asp-controller="Account">Добавить пользователя</a>
+	<a class="btn btn-outline-secondary" asp-action="Index" asp-controller="Admin">Вернуться на панель</a>
+</div><br />
+<table class="table table-striped table-bordered">
+	@foreach (var user in Model)
+	{
+		<tr>
+			<td>@user.Email</td>
+			<td>
+				<a class="btn btn-outline-secondary" asp-action="EditUserRoles" asp-route-id="@user.Id">
+					Редактировать роли
+				</a>
+				<a class="btn btn-outline-secondary" asp-action="EditProfile" asp-controller="Account"
+					asp-route-id="@user.Id">
+					Редактировать пользователя
+				</a>
+				<form asp-action="DeleteUser" method="post" asp-route-id="@user.Id">
+					<button type="submit" class="btn btn-outline-danger">Удалить</button>
+				</form>
+				// TODO Сделать все кнопки в одну линию
+			</td>
+		</tr>
+	}
+</table>

@@ -17,8 +17,14 @@ builder.Services.AddDbContext<NetworkDbContext>(options => options.UseSqlServer(
 builder.Services.AddIdentity<User, IdentityRole>().AddEntityFrameworkStores<NetworkDbContext>()
 	.AddDefaultTokenProviders();
 
+builder.Services.ConfigureApplicationCookie(options =>
+{
+	options.LoginPath = "/Account/Login";
+});
+
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<UserService>();
+builder.Services.AddScoped<RoleService>();
 
 var app = builder.Build();
 

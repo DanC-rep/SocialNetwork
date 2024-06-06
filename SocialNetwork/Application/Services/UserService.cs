@@ -9,12 +9,10 @@ namespace Application.Services
 	public class UserService
 	{
 		private readonly IUserRepository userRepository;
-		private readonly UserManager<User> userManager;
 
 		public UserService(IUserRepository usrRepo, UserManager<User> usrMgr)
 		{
 			userRepository = usrRepo;
-			userManager = usrMgr;
 		}
 
 		public User CreateUser(RegisterViewModel _user)
@@ -25,7 +23,7 @@ namespace Application.Services
 				Name = _user.Name,
 				Surname = _user.Surname,
 				Patronymic = _user.Patronymic,
-				BirthDate = _user.BirthDate,
+				BirthDate = _user.BirthDate.GetValueOrDefault(),
 				City = _user.City,
 				Country = _user.Country,
 				Gender = _user.Gender,
@@ -47,6 +45,21 @@ namespace Application.Services
 			};
 		}
 
+		public EditProfileViewModel CreateEditProfileDTO(User user)
+		{
+			return new EditProfileViewModel
+			{
+				Id = user.Id,
+				Name = user.Name,
+				Surname = user.Surname,
+				Patronymic = user.Patronymic,
+				City = user.City,
+				Country = user.Country,
+				BirthDate = user.BirthDate,
+				Gender = user.Gender
+			};
+		}
+
 		public async Task<User> GetByEmail(string email)
 		{
 			return await userRepository.GetByEmail(email);
@@ -61,5 +74,35 @@ namespace Application.Services
 		{
 			return await userRepository.GetAuthUserInfo(user);
 		}
-	}
+
+		public IEnumerable<User> GetAllUsers()
+		{
+			return userRepository.GetAllUsers();
+		}
+
+		public async Task<IList<string>> GetUserRoles(User user)
+		{
+			return await userRepository.GetUserRoles(user);
+		}
+
+		public async Task AddUserToRoles(User user, IEnumerable<string> roles)
+		{
+			await userRepository.AddUserToRoles(user, roles);
+		}
+
+		public async Task RemoveUserFromRoles(User user, IEnumerable<string> roles)
+		{
+			await userRepository.RemoveUserFromRoles(user, roles);
+		}
+
+		public async Task<IdentityResult> EditProfile(EditProfileViewModel model)
+		{
+			return await userRepository.Edit(model);
+		}
+
+		public async Task<IdentityResult> DeleteUser(string id)
+		{
+			return await userRepository.Delete(id);
+		}
+ 	}
 }

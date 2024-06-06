@@ -1,0 +1,12 @@
+﻿@{
+	Layout = "_Layout";
+}
+
+<h1>Панель администратора</h1>
+<div class="list-group">
+	<a asp-controller="Roles" asp-action="RolesList" class="list-group-item list-group-item-action">
+		Посмотреть список ролей</a>
+	<a asp-controller="Users" asp-action="UsersList" class="list-group-item list-group-item-action">
+		Посмотреть список пользователей
+	</a>
+</div>

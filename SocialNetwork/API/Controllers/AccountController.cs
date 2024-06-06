@@ -37,6 +37,11 @@ namespace API.Controllers
 
 				if (result.Succeeded)
 				{
+					if (signInManager.IsSignedIn(User) && User.IsInRole("Admin"))
+					{
+						return RedirectToAction("UsersList", "Users");
+					}
+
 					await signInManager.SignInAsync(user, false);
 					return RedirectToAction("Index", "Home");
 				}
@@ -47,19 +52,25 @@ namespace API.Controllers
 		}
 
 		[HttpGet]
-		public IActionResult Login()
+		public IActionResult Login(string? returnUrl = null)
 		{
+			ViewData["ReturnUrl"] = returnUrl;
 			return View();
 		}
 
 		[HttpPost]
 		[ValidateAntiForgeryToken]
-		public async Task<IActionResult> Login(LoginViewModel model)
+		public async Task<IActionResult> Login(LoginViewModel model, string? returnUrl)
 		{
 			var result = await signInManager.PasswordSignInAsync(model.Email, model.Password, model.RememberMe, false);
 
 			if (result.Succeeded)
 			{
+				if (!string.IsNullOrEmpty(returnUrl) && Url.IsLocalUrl(returnUrl))
+				{
+					return Redirect(returnUrl);
+				}
+
 				return RedirectToAction("Index", "Home");
 			}
 
@@ -74,6 +85,41 @@ namespace API.Controllers
 		{
 			await signInManager.SignOutAsync();
 			return RedirectToAction("Index", "Home");
+		}
+
+		[HttpGet]
+		public IActionResult AccessDenied()
+		{
+			return View();
+		}
+
+		[HttpGet]
+		public async Task<IActionResult> EditProfile(string id)
+		{
+			var user = await userService.GetById(id);
+
+			if (user != null)
+			{
+				return View(userService.CreateEditProfileDTO(user));
+			}
+			return NotFound();
+		}
+
+		[HttpPost]
+		public async Task<IActionResult> EditProfile(EditProfileViewModel model)
+		{
+			if (ModelState.IsValid)
+			{
+				var result = await userService.EditProfile(model);
+
+				if (result.Succeeded)
+				{
+					return RedirectToAction("UsersList", "Users");
+				}
+				AddErrorsFromResult(result);
+			}
+
+			return View(model);
 		}
 
 		private void AddErrorsFromResult(IdentityResult result)

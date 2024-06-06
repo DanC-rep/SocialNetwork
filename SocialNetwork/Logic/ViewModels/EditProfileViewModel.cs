@@ -1,31 +1,19 @@
-﻿using Logic.DataAnnotations;
-using Logic.Enums;
 using System.ComponentModel.DataAnnotations;
+using Logic.DataAnnotations;
+using Logic.Enums;
 
 namespace Logic.ViewModels
 {
-	public class RegisterViewModel
-	{
-		[Required(ErrorMessage = "Введите Email")]
-		[EmailAddress]
-		public string Email { get; set; } = string.Empty;
+    public class EditProfileViewModel
+    {
+        [Required]
+        public string Id { get;set; } = string.Empty;
+        
+        [Required(ErrorMessage = "Введите имя")]
+        [Display(Name = "Имя")]
+        public string Name{ get; set; } = string.Empty;
 
-		[Required(ErrorMessage = "Введите пароль")]
-		[Display(Name = "Пароль")]
-		[DataType(DataType.Password)]
-		public string Password { get; set; } = string.Empty;
-
-		[Required(ErrorMessage = "Необходимо подтверждение пароля")]
-		[DataType(DataType.Password)]
-		[Display(Name = "Подтвердите пароль")]
-		[Compare("Password", ErrorMessage = "Пароли не совпадают")]
-		public string ConfirmPassword { get; set; } = string.Empty;
-
-		[Required(ErrorMessage = "Введите имя")]
-		[Display(Name = "Имя")]
-		public string Name { get; set; } = string.Empty;
-
-		[Required(ErrorMessage = "Введите фамилию")]
+        [Required(ErrorMessage = "Введите фамилию")]
 		[Display(Name = "Фамилия")]
 		public string Surname { get; set; } = string.Empty;
 
@@ -49,5 +37,5 @@ namespace Logic.ViewModels
 		[Required(ErrorMessage = "Введите пол")]
 		[Display(Name = "Пол")]
 		public Gender Gender { get; set; } = Gender.Secret;
-	}
+    }
 }
