@@ -4,16 +4,16 @@ using Logic.Enums;
 
 namespace Logic.ViewModels
 {
-    public class EditProfileViewModel
-    {
-        [Required]
-        public string Id { get;set; } = string.Empty;
-        
-        [Required(ErrorMessage = "Введите имя")]
-        [Display(Name = "Имя")]
-        public string Name{ get; set; } = string.Empty;
+	public class EditProfileViewModel
+	{
+		[Required]
+		public string Id { get; set; } = string.Empty;
 
-        [Required(ErrorMessage = "Введите фамилию")]
+		[Required(ErrorMessage = "Введите имя")]
+		[Display(Name = "Имя")]
+		public string Name { get; set; } = string.Empty;
+
+		[Required(ErrorMessage = "Введите фамилию")]
 		[Display(Name = "Фамилия")]
 		public string Surname { get; set; } = string.Empty;
 
@@ -37,5 +37,5 @@ namespace Logic.ViewModels
 		[Required(ErrorMessage = "Введите пол")]
 		[Display(Name = "Пол")]
 		public Gender Gender { get; set; } = Gender.Secret;
-    }
+	}
 }

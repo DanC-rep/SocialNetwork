@@ -1,7 +1,6 @@
 ﻿using Application.Services;
 using Logic.Models;
 using Logic.ViewModels;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace API.Controllers
@@ -14,31 +13,24 @@ namespace API.Controllers
 		{
 			userService = usrService;
 		}
-
+		
+		[HttpGet]
 		public IActionResult Index()
 		{
 			return View();
 		}
 
-		[Authorize]
-		public async Task<IActionResult> Profile(string? id = null)
+		[HttpGet]
+		public async Task<IActionResult> UserProfile(string id)
 		{
-			User user; 
-			if (id is null)
-			{
-				user = await userService.GetAuthUserInfo(User);
-			}
-			else
-			{
-				user = await userService.GetById(id);
-			}
+			User user = await userService.GetById(id);
 
 			if (user != null)
 			{
 				ProfileInfoViewModel profile = userService.GetProfileInfo(user); 
 				return View(profile);
 			}
-			return View("Index");
+			return NotFound();
 		}
 	}
 }

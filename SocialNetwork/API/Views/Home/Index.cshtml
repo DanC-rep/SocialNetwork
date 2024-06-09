@@ -2,24 +2,6 @@
 	Layout = "_Layout";
 	ViewBag.Title = "Главная";
 }
-<div>
-	@if (User.Identity.IsAuthenticated)
-	{
-		<form method="post" asp-controller="Account" asp-action="Logout">
-			<button type="submit" class="btn btn-outline-danger">Выход</button>
-			<a class="btn btn-outline-primary" asp-controller="Home" asp-action="Profile">Мой профиль</a>
-			@if (User.IsInRole("Admin"))
-			{
-				<a class="btn btn-outline-secondary" asp-controller="Admin" asp-action="Index">Панель администратора</a>
-			}
-		</form>
-	}
-	else
-	{
-		<a class="btn btn-outline-secondary" asp-controller="Account" asp-action="Register">Зарегистрироваться</a>
-		<a class="btn btn-outline-secondary" asp-controller="Account" asp-action="Login">Вход</a>
-	}
-</div>
 
 @if (User.Identity.IsAuthenticated)
 {

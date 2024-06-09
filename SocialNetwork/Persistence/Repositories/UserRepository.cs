@@ -18,6 +18,10 @@ namespace Persistence.Repositories
 			userManager = usrMgr;
 		}
 
+		public async Task<IdentityResult> Add(User user, string password)
+		{
+			return await userManager.CreateAsync(user, password);
+		}
 		public async Task<IdentityResult> Delete(string id)
 		{
 			var user = await userManager.FindByIdAsync(id);
@@ -61,6 +65,11 @@ namespace Persistence.Repositories
 			return await userManager.FindByIdAsync(id);
 		}
 
+		public async Task<User> Get(ClaimsPrincipal user)
+		{
+			return await userManager.GetUserAsync(user);
+		}
+
 		public async Task<User> GetAuthUserInfo(ClaimsPrincipal user)
 		{
 			return await userManager.GetUserAsync(user);
@@ -84,6 +93,31 @@ namespace Persistence.Repositories
 		public async Task RemoveUserFromRoles(User user, IEnumerable<string> roles)
 		{
 			await userManager.RemoveFromRolesAsync(user, roles);
+		}
+
+		public async Task<bool> CheckPassword(User user, string password)
+		{
+			return await userManager.CheckPasswordAsync(user, password);
+		}
+
+		public async Task<int> GetAttempsLoginLeft(User user)
+		{
+			return userManager.Options.Lockout.MaxFailedAccessAttempts - await userManager.GetAccessFailedCountAsync(user);
+		}
+
+		public async Task<bool> CheckUserLockedOut(User user)
+		{
+			return await userManager.IsLockedOutAsync(user);
+		}
+
+		public async Task SetUserLockoutEndDate(User user)
+		{
+			await userManager.SetLockoutEndDateAsync(user, DateTimeOffset.UtcNow);
+		}
+
+		public async Task RemoveUserAuthToken(User user)
+		{
+			await userManager.RemoveAuthenticationTokenAsync(user, "ResetPassword", "ResetPasswordToken");
 		}
 	}
 }

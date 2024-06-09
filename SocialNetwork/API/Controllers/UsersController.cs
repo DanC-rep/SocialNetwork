@@ -77,7 +77,7 @@ namespace API.Controllers
 				return RedirectToAction("UsersList");
 			}
 
-			return NotFound(); // TODO Проверить работу метода, а то ошибку выдает при удалении
+			return NotFound();
 		}
 	}
 }

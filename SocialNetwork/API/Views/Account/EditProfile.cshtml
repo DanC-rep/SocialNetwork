@@ -9,6 +9,7 @@
 <div asp-validation-summary="All" class="text-danger"></div>
 <form action="EditProfile" method="post">
     <input type="hidden" name="Id" value="@Model.Id">
+    <input type="hidden" name="returnUrl" value="@ViewData["returnUrl"]">
     <div class="form-group">
         <label asp-for="Name"></label>
         <input asp-for="Name" class="form-control">

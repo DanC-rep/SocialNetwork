@@ -5,6 +5,7 @@ using Microsoft.EntityFrameworkCore;
 using Application.Services;
 using Logic.Interfaces;
 using Persistence.Repositories;
+using Infrastructure;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -14,7 +15,13 @@ var connString = builder.Configuration["Data:NetworkDb:ConnectionString"];
 
 builder.Services.AddDbContext<NetworkDbContext>(options => options.UseSqlServer(connString));
 
-builder.Services.AddIdentity<User, IdentityRole>().AddEntityFrameworkStores<NetworkDbContext>()
+builder.Services.AddIdentity<User, IdentityRole>(
+	options => 
+	{
+		options.SignIn.RequireConfirmedEmail = true;
+		options.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(30);
+		options.Lockout.MaxFailedAccessAttempts = 10;
+	}).AddEntityFrameworkStores<NetworkDbContext>()
 	.AddDefaultTokenProviders();
 
 builder.Services.ConfigureApplicationCookie(options =>
@@ -25,6 +32,10 @@ builder.Services.ConfigureApplicationCookie(options =>
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<UserService>();
 builder.Services.AddScoped<RoleService>();
+builder.Services.AddScoped<EmailService>();
+builder.Services.AddScoped<PasswordService>();
+
+builder.Services.AddTransient<ISendEmail, EmailSender>();
 
 var app = builder.Build();
 

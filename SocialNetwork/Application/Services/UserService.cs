@@ -35,6 +35,7 @@ namespace Application.Services
 		{
 			return new ProfileInfoViewModel
 			{
+				Id = user.Id,
 				Name = user.Name,
 				Surname = user.Surname,
 				Patronymic = user.Patronymic,
@@ -70,6 +71,11 @@ namespace Application.Services
 			return await userRepository.GetById(id);
 		}
 
+		public async Task<User> Get(ClaimsPrincipal user)
+		{
+			return await userRepository.Get(user);
+		}
+
 		public async Task<User> GetAuthUserInfo(ClaimsPrincipal user)
 		{
 			return await userRepository.GetAuthUserInfo(user);
@@ -103,6 +109,35 @@ namespace Application.Services
 		public async Task<IdentityResult> DeleteUser(string id)
 		{
 			return await userRepository.Delete(id);
+		}
+
+		public async Task<bool> CheckPassword(User user, string password) 
+		{
+			return await userRepository.CheckPassword(user, password);
+		}
+
+		public async Task<IdentityResult> CreateUser(User user, string password)
+		{
+			return await userRepository.Add(user, password);
+		}
+
+		public async Task<int> GetAttempsLoginLeft(User user)
+		{
+			return await userRepository.GetAttempsLoginLeft(user);
+		}
+		public async Task<bool> CheckUserLockedOut(User user)
+		{
+			return await userRepository.CheckUserLockedOut(user);
+		}
+
+		public async Task SetUserLockoutEndDate(User user)
+		{
+			await userRepository.SetUserLockoutEndDate(user);
+		}
+
+		public async Task RemoveUserAuthToken(User user)
+		{
+			await userRepository.RemoveUserAuthToken(user);
 		}
  	}
 }

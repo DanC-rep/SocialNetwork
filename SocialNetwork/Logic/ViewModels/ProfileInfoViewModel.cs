@@ -5,6 +5,8 @@ namespace Logic.ViewModels
 {
 	public class ProfileInfoViewModel
 	{
+		public string Id { get; set; } = string.Empty;
+
 		[Display(Name = "Имя")]
 		public string Name { get; set; } = string.Empty;
 
