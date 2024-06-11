@@ -14,7 +14,6 @@ namespace Logic.Interfaces
 		Task<User> GetById(string id);
 		Task<User> GetByEmail(string email);
 		Task<User> Get(ClaimsPrincipal user);
-		Task<User> GetAuthUserInfo(ClaimsPrincipal user);
 		IEnumerable<User> GetAllUsers();
 		Task<IList<string>> GetUserRoles(User user);
 		Task AddUserToRoles(User user, IEnumerable<string> roles);

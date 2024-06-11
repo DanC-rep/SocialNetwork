@@ -76,11 +76,6 @@ namespace Application.Services
 			return await userRepository.Get(user);
 		}
 
-		public async Task<User> GetAuthUserInfo(ClaimsPrincipal user)
-		{
-			return await userRepository.GetAuthUserInfo(user);
-		}
-
 		public IEnumerable<User> GetAllUsers()
 		{
 			return userRepository.GetAllUsers();

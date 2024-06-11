@@ -70,11 +70,6 @@ namespace Persistence.Repositories
 			return await userManager.GetUserAsync(user);
 		}
 
-		public async Task<User> GetAuthUserInfo(ClaimsPrincipal user)
-		{
-			return await userManager.GetUserAsync(user);
-		}
-
 		public IEnumerable<User> GetAllUsers()
 		{
 			return userManager.Users;

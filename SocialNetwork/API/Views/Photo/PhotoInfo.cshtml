@@ -1,0 +1,13 @@
+@model PhotoInfo
+@{
+    Layout = "_Layout";
+}
+
+<img src="data:image/png;base64, @Model.Data" class="user-avatar" aria-colspan="photo-info">
+
+<form asp-action="DeletePhoto" method="post" asp-route-id="@Model.Id">
+    <button type="submit" class="btn btn-outline-danger">Удалить фото</button>
+</form>
+<form asp-action="MakeNewAvatar" method="post" asp-route-id="@Model.Id">
+    <button type="submit" class="btn btn-outline-primary">Сделать главным</button>
+</form>

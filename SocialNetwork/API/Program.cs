@@ -16,7 +16,7 @@ var connString = builder.Configuration["Data:NetworkDb:ConnectionString"];
 builder.Services.AddDbContext<NetworkDbContext>(options => options.UseSqlServer(connString));
 
 builder.Services.AddIdentity<User, IdentityRole>(
-	options => 
+	options =>
 	{
 		options.SignIn.RequireConfirmedEmail = true;
 		options.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(30);
@@ -30,10 +30,13 @@ builder.Services.ConfigureApplicationCookie(options =>
 });
 
 builder.Services.AddScoped<IUserRepository, UserRepository>();
+builder.Services.AddScoped<IUserFilesRepository, UserFilesRepository>();
+
 builder.Services.AddScoped<UserService>();
 builder.Services.AddScoped<RoleService>();
 builder.Services.AddScoped<EmailService>();
 builder.Services.AddScoped<PasswordService>();
+builder.Services.AddScoped<FileService>();
 
 builder.Services.AddTransient<ISendEmail, EmailSender>();
 

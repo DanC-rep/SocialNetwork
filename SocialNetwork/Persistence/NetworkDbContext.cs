@@ -8,5 +8,6 @@ namespace Persistence
 	{
 		public NetworkDbContext(DbContextOptions<NetworkDbContext> options) : base(options) { }
 
+		public DbSet<FileModel> Files { get; set; }
 	}
 }

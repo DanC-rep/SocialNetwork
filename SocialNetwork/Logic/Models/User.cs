@@ -15,5 +15,7 @@ namespace Logic.Models
 		public string Country { get; set; } = string.Empty;
 
 		public Gender Gender { get; set; } = Gender.Secret;
+
+		public ICollection<FileModel> Files { get; set; }
 	}
 }

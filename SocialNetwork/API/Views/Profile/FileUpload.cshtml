@@ -1,0 +1,19 @@
+@{
+    Layout = "_Layout";
+}
+
+<h2>Загрузка изображения</h2>
+<hr>
+<div class="row">
+    <div class="col-md-12">
+        <form method="post" asp-action="FileUpload" enctype="multipart/form-data">
+            <div asp-validation-summary="All" class="text-danger"></div>
+            <input type="file" name="file" class="form-control" accept=".jpg,.png">
+            <div class="form-group">
+                <label for="_isAvatar">Сделать фото главным?</label>
+                <input type="checkbox" name="_isAvatar" for="_isAvatar">
+            </div>
+            <button type="submit" class="btn btn-primary">Загрузить</button>
+        </form>
+    </div>
+</div>

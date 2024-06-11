@@ -1,5 +1,4 @@
 ﻿using Application.Services;
-using Logic.Interfaces;
 using Logic.Models;
 using Logic.ViewModels;
 using Microsoft.AspNetCore.Authorization;
@@ -112,55 +111,6 @@ namespace API.Controllers
 		public IActionResult AccessDenied()
 		{
 			return View();
-		}
-
-		[HttpGet]
-		public async Task<IActionResult> EditProfile(string id, string? url = null)
-		{
-			var user = await userService.GetById(id);
-
-			if (user != null)
-			{
-				ViewData["returnUrl"] = url;
-				return View(userService.CreateEditProfileDTO(user));
-			}
-			return NotFound();
-		}
-
-		[HttpPost]
-		public async Task<IActionResult> EditProfile(EditProfileViewModel model, string? returnUrl)
-		{
-			if (ModelState.IsValid)
-			{
-				var result = await userService.EditProfile(model);
-
-				if (result.Succeeded)
-				{
-					if (!string.IsNullOrEmpty(returnUrl) && Url.IsLocalUrl(returnUrl))
-					{
-						return Redirect(returnUrl);
-					}
-					return RedirectToAction("MyProfile", "Account");
-				}
-				AddErrorsFromResult(result);
-			}
-
-			return View(model);
-		}
-
-		[HttpGet]
-		[Authorize]
-		public async Task<IActionResult> MyProfile()
-		{
-			User user = await userService.GetAuthUserInfo(User);
-
-			if (user != null)
-			{
-				ProfileInfoViewModel profile = userService.GetProfileInfo(user);
-				return View(profile);
-			}
-
-			return NotFound();
 		}
 
 		[HttpGet]

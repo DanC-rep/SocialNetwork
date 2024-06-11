@@ -1,4 +1,5 @@
 ﻿using Logic.Enums;
+using Logic.Models;
 using System.ComponentModel.DataAnnotations;
 
 namespace Logic.ViewModels
@@ -27,5 +28,8 @@ namespace Logic.ViewModels
 
 		[Display(Name = "Пол")]
 		public Gender Gender { get; set; }
+
+		public string Avatar { get; set; } = string.Empty;
+		public IEnumerable<PhotoInfo>? Photos { get; set; }
 	}
 }
