@@ -4,7 +4,7 @@ namespace Logic.Interfaces
 {
     public interface IUserFilesRepository
     {
-        Task Add(FileModel file);
+        void Add(FileModel file);
         FileModel GetUserAvatar(User user);
         void DisableAvatars(FileModel file);
         IEnumerable<FileModel> GetUserPhotos(User user);

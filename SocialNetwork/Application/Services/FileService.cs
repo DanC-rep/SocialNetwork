@@ -3,7 +3,6 @@ using Logic.Interfaces;
 using Logic.Models;
 using Logic.ViewModels;
 
-
 namespace Application.Services
 {
     public class FileService
@@ -47,7 +46,7 @@ namespace Application.Services
             return fileData;
         }
 
-        public async Task SaveFile(FileModel file)
+        public void SaveFile(FileModel file)
         {
             if (file.IsAvatar)
             {

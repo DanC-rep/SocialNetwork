@@ -49,7 +49,6 @@ namespace Persistence.Repositories
 				dbEntry.Gender = user.Gender;
 
 				return await userManager.UpdateAsync(dbEntry);
-				// TODO: Прописать смену пароля (наверное отдельным методом)
 			}
 
 			return IdentityResult.Failed();
@@ -57,7 +56,7 @@ namespace Persistence.Repositories
 
 		public async Task<User> GetByEmail(string email)
 		{
-			return await userManager.FindByEmailAsync(email);
+			return await userManager.FindByEmailAsync(email) ?? new User();
 		}
 
 		public async Task<User> GetById(string id)

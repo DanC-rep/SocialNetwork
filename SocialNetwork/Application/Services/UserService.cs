@@ -1,4 +1,5 @@
-﻿using Logic.Interfaces;
+﻿using Logic.Enums;
+using Logic.Interfaces;
 using Logic.Models;
 using Logic.ViewModels;
 using Microsoft.AspNetCore.Identity;
@@ -9,10 +10,12 @@ namespace Application.Services
 	public class UserService
 	{
 		private readonly IUserRepository userRepository;
+		private readonly FriendsService friendsService;
 
-		public UserService(IUserRepository usrRepo, UserManager<User> usrMgr)
+		public UserService(IUserRepository usrRepo, FriendsService _friendsService)
 		{
 			userRepository = usrRepo;
+			friendsService = _friendsService;
 		}
 
 		public User CreateUser(RegisterViewModel _user)
@@ -42,7 +45,9 @@ namespace Application.Services
 				City = user.City,
 				Country = user.Country,
 				BirthDate = user.BirthDate.ToString("MM.dd.yyyy"),
-				Gender = user.Gender
+				Gender = user.Gender,
+				FriendsCount = friendsService.GetFriendsByRelation(user.Id, RelationType.Friend).Count(),
+				FollowersCount = friendsService.GetFriendsByRelation(user.Id, RelationType.Following).Count()
 			};
 		}
 

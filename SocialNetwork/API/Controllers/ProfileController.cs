@@ -6,6 +6,7 @@ using Application.Services;
 using Microsoft.AspNetCore.Identity;
 using Application.Options;
 using Microsoft.IdentityModel.Tokens;
+using Logic.Enums;
 
 namespace API.Controllers
 {
@@ -14,37 +15,43 @@ namespace API.Controllers
     {
         private readonly UserService userService;
         private readonly FileService fileService;
+        private readonly NotificationsService notificationsService;
+        private readonly FriendsService friendsService;
 
-        public ProfileController(UserService _userService, FileService _fileService)
+        public ProfileController(UserService _userService, FileService _fileService, NotificationsService _notificationsService, FriendsService _friendsService)
         {
             userService = _userService;
             fileService = _fileService;
+            notificationsService = _notificationsService;
+            friendsService = _friendsService;
         }
 
         [HttpGet]
-        public async Task<IActionResult> MyProfile()
+        [AllowAnonymous]
+        public async Task<IActionResult> ProfileInfo(string? id = null)
         {
-            User user = await userService.Get(User);
+            bool isOwnPage = id.IsNullOrEmpty();
+
+            User user = await (isOwnPage ? userService.Get(User) : userService.GetById(id));
 
             if (user != null)
             {
                 ProfileInfoViewModel profile = userService.GetProfileInfo(user);
-                var photoData = fileService.GetUserAvatar(user).Data;
+                SetProfilePhotos(user, profile);
 
-                if (!photoData.IsNullOrEmpty())
+                if ((User.Identity.IsAuthenticated && user.Email == User.Identity.Name) || isOwnPage)
                 {
-                    profile.Avatar = Convert.ToBase64String(photoData);
-                }
-                else
-                {
-                    var memoryStream = fileService.OpenDefaultImage();
-                    var file = MakeFormFileFromStream(memoryStream);
-                    profile.Avatar = Convert.ToBase64String(fileService.ConvertToByteArray(file.OpenReadStream(), file.Length));
+                    return View("MyProfile", profile);
                 }
 
-                profile.Photos = fileService.GetUserPhotosInfo(user);
+                if (User.Identity.IsAuthenticated)
+                {
+                    User ownUser = await userService.Get(User);
+                    var relationType = friendsService.GetRelationType(user, ownUser);
+                    profile.RelationType = relationType;
+                }
 
-                return View(profile);
+                return View("UserProfile", profile);
             }
 
             return NotFound();
@@ -60,6 +67,7 @@ namespace API.Controllers
                 ViewData["returnUrl"] = url;
                 return View(userService.CreateEditProfileDTO(user));
             }
+
             return NotFound();
         }
 
@@ -85,47 +93,119 @@ namespace API.Controllers
         }
 
         [HttpGet]
-        public IActionResult FileUpload()
+        public async Task<IActionResult> Notifications()
         {
-            return View();
+            User user = await userService.Get(User);
+            return View(notificationsService.GetUserNotifications(user.Id));
         }
+
         [HttpPost]
-        public async Task<IActionResult> FileUpload(IFormFile file, string? _isAvatar = null)
+        public async Task<IActionResult> SendFriendRequest(string id)
         {
-            if (file != null && file.Length > FileSettings.MaxFileUploadSizeMb * 1000000)
+            User receiver = await userService.GetById(id);
+
+            if (receiver != null)
             {
-                ModelState.AddModelError("", $"Размер файла не может превышать {FileSettings.MaxFileUploadSizeMb} МБ");
+                User sender = await userService.Get(User);
+
+                notificationsService.SendFriendRequest(sender, receiver);
+                friendsService.SendFriendRequest(sender, receiver);
+
+                return RedirectToAction("ProfileInfo", "Profile", new { id = id });
+            }
+            return NotFound();
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> CancelSubscription(string id)
+        {
+            User receiver = await userService.GetById(id);
+
+            if (receiver != null)
+            {
+                User sender = await userService.Get(User);
+
+                friendsService.CancelSubscribtion(sender, receiver);
+                notificationsService.Delete(sender, receiver, NotificationType.FriendRequest);
+
+                return RedirectToAction("ProfileInfo", "Profile", new { id = id });
             }
 
-            var extension = fileService.GetFileExtension(file?.FileName ?? "");
+            return NotFound();
+        }
 
-            if (extension.IsNullOrEmpty() || !FileSettings.PermittedExtensions.Contains(extension))
-            {
-                ModelState.AddModelError("", "Неправильный тип файла");
-            }
+        [HttpPost]
+        public async Task<IActionResult> RemoveFromFriends(string id, string? returnUrl)
+        {
+            User receiver = await userService.GetById(id);
 
-            var mimeType = file.ContentType;
-            if (!FileSettings.PermittedMimeTypes.Contains(mimeType))
+            if (receiver != null)
             {
-                ModelState.AddModelError("", "Неверный тип MIME");
-            }
+                User sender = await userService.Get(User);
 
-            if (ModelState.IsValid)
-            {
-                if (file != null && file.Length > 0)
+                friendsService.RemoveFromFriends(sender, receiver);
+
+                if (!string.IsNullOrEmpty(returnUrl) && Url.IsLocalUrl(returnUrl))
                 {
-                    bool isAvatar = _isAvatar.IsNullOrEmpty() ? false : true;
-                    var stream = file.OpenReadStream();
-                    User user = await userService.Get(User);
-                    var fileModel = fileService.CreateFileModel(file.FileName, file.Length, mimeType, stream, user, isAvatar);
+                    return Redirect(returnUrl);
+                }
+                return RedirectToAction("RelationList", new { id = sender.Id, relationType = RelationType.Friend });
+            }
 
-                    await fileService.SaveFile(fileModel);
+            return NotFound();
+        }
 
-                    return RedirectToAction("MyProfile");
+        [HttpPost]
+        public async Task<IActionResult> AddToFriends(string id, string? returnUrl)
+        {
+            var receiver = await userService.GetById(id);
+
+            if (receiver != null)
+            {
+                User sender = await userService.Get(User);
+
+                friendsService.AddToFriends(sender, receiver);
+
+                notificationsService.Delete(receiver, sender, NotificationType.FriendRequest);
+                notificationsService.ApproveFriendRequest(sender, receiver);
+
+                if (!string.IsNullOrEmpty(returnUrl) && Url.IsLocalUrl(returnUrl))
+                {
+                    return Redirect(returnUrl);
+                }
+                return RedirectToAction("RelationList", new { id = sender.Id, relationType = RelationType.Friend });
+            }
+
+            return NotFound();
+        }
+
+        [HttpGet]
+        [AllowAnonymous]
+        public async Task<IActionResult> RelationList(string id, RelationType relationType)
+        {
+            var relations = friendsService.GetFriendsByRelation(id, relationType);
+            var users = new List<User>();
+
+            foreach (var relation in relations)
+            {
+                users.Add(await userService.GetById(relation.FriendId));
+            }
+
+            var profiles = users.Select(u => userService.GetProfileInfo(u)).ToList();
+
+            if (User.Identity.IsAuthenticated)
+            {
+                var ownUser = await userService.Get(User);
+
+                if (ownUser.Id == id)
+                {
+                    profiles.ForEach(p => p.RelationType = relationType);
                 }
             }
-            return View();
+
+            return View(profiles);
         }
+
 
         private void AddErrorsFromResult(IdentityResult result)
         {
@@ -135,9 +215,22 @@ namespace API.Controllers
             }
         }
 
-        private IFormFile MakeFormFileFromStream(MemoryStream stream)
+        private void SetProfilePhotos(User user, ProfileInfoViewModel profile)
         {
-            return new FormFile(stream, 0, stream.Length, FileSettings.DefaultImageSettings["Name"], FileSettings.DefaultImageSettings["ContentType"]);
+            var photoData = fileService.GetUserAvatar(user).Data;
+
+            if (!photoData.IsNullOrEmpty())
+            {
+                profile.Avatar = Convert.ToBase64String(photoData);
+            }
+            else
+            {
+                var memoryStream = fileService.OpenDefaultImage();
+                var file = new FormFile(memoryStream, 0, memoryStream.Length, FileSettings.DefaultImageSettings["Name"], FileSettings.DefaultImageSettings["ContentType"]);
+                profile.Avatar = Convert.ToBase64String(fileService.ConvertToByteArray(file.OpenReadStream(), file.Length));
+            }
+
+            profile.Photos = fileService.GetUserPhotosInfo(user);
         }
     }
 }

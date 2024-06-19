@@ -13,7 +13,7 @@ namespace Persistence.Repositories
         {
             context = _contex;
         }
-        public async Task Add(FileModel file)
+        public void Add(FileModel file)
         {
             context.Files.Add(file);
             context.SaveChanges();
@@ -51,7 +51,7 @@ namespace Persistence.Repositories
 
         public void SetAvatar(FileModel file)
         {
-            FileModel dbEntry = context.Files.SingleOrDefault(f => f.Id == file.Id);
+            FileModel? dbEntry = context.Files.SingleOrDefault(f => f.Id == file.Id);
 
             if (dbEntry != null)
             {

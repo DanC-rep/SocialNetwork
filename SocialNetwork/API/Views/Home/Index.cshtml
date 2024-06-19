@@ -1,4 +1,5 @@
-﻿@{
+﻿@model IEnumerable<ProfileInfoViewModel>
+@{
 	Layout = "_Layout";
 	ViewBag.Title = "Главная";
 }
@@ -7,3 +8,14 @@
 {
 	<h1 class="text-center">Добро пожаловать</h1>
 }
+
+<div class="text-center">
+	<h3>Заводите новые знакомства</h3>
+	@foreach (var profile in Model)
+	{
+		<a class="btn btn-outline-secondary" asp-action="ProfileInfo" asp-controller="Profile" asp-route-id="@profile.Id">
+			<p>@profile.Name @profile.Surname</p>
+			<p>@profile.City</p>
+		</a>
+	}
+</div>

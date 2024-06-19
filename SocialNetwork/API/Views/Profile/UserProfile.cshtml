@@ -1,25 +1,46 @@
-@model ProfileInfoViewModel
+﻿@model ProfileInfoViewModel
 @using Logic.Enums
 @{
 	Layout = "_Layout";
 }
 
-<h1>Ваш профиль</h1>
-<div>
-	<a asp-action="EditProfile" class="btn btn-outline-secondary" asp-route-id="@Model.Id"
-		asp-route-url="/Profile/MyProfile">Редактировать профиль</a>
-	<a asp-action="FileUpload" asp-controller="Photo" class="btn btn-outline-secondary">Добавить фото профиля</a>
-</div>
+<h1>Информация о пользователе</h1>
 <img src="data:image/png;base64, @Model.Avatar" class="user-avatar">
 
 <div class="user-photos-block">
 	@foreach (var photo in @Model.Photos)
 	{
-		<a asp-action="PhotoInfo" asp-controller="Photo" asp-route-id="@photo.Id">
-			<img src="data:image/png;base64, @photo.Data" class="user-icon">
-		</a>
+		<img src="data:image/png;base64, @photo.Data" class="user-icon">
 	}
 </div>
+
+@if (User.Identity.IsAuthenticated)
+{
+	if (Model.RelationType == RelationType.None)
+	{
+		<form asp-action="SendFriendRequest" asp-route-id="@Model.Id" asp-route-returnUrl="/Profile/ProfileInfo/@Model.Id">
+			<button type="submit" class="btn btn-outline-secondary">Добавить в друзья</button>
+		</form>
+	}
+	else if (Model.RelationType == RelationType.Following)
+	{
+		<form asp-action="CancelSubscription" asp-route-id="@Model.Id">
+			<button type="submit" class="btn btn-outline-secondary">Отменить подписку</button>
+		</form>
+	}
+	else if (Model.RelationType == RelationType.Follower)
+	{
+		<form asp-action="AddToFriends" asp-route-id="@Model.Id">
+			<button type="submit" class="btn btn-outline-secondary">Подтвердить заявку в друзья</button>
+		</form>
+	}
+	else if (Model.RelationType == RelationType.Friend)
+	{
+		<form asp-action="RemoveFromFriends" asp-route-id="@Model.Id" asp-route-returnUrl="/Profile/ProfileInfo/@Model.Id">
+			<button type="submit" class="btn btn-outline-secondary">Удалить из друзей</button>
+		</form>
+	}
+}
 
 <table class="table table-striped table-bordered">
 	<tr>

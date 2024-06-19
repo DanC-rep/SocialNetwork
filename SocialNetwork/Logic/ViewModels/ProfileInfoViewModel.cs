@@ -29,6 +29,30 @@ namespace Logic.ViewModels
 		[Display(Name = "Пол")]
 		public Gender Gender { get; set; }
 
+		[Display(Name = "Друзья")]
+		public int FriendsCount { get; set; }
+
+		[Display(Name = "Подписчики")]
+		public int FollowersCount { get; set; }
+
+		public RelationType RelationType { get; set; } = RelationType.None;
+
+		public string RelationTypeRu 
+		{
+			get
+			{
+				switch (RelationType)
+				{
+					case RelationType.Friend:
+						return "В друзьях";
+					case RelationType.Follower:
+						return "Подписчик";
+					default:
+						return string.Empty;
+				}
+			}
+		}
+
 		public string Avatar { get; set; } = string.Empty;
 		public IEnumerable<PhotoInfo>? Photos { get; set; }
 	}

@@ -1,5 +1,4 @@
 ﻿using Application.Services;
-using Logic.Models;
 using Logic.ViewModels;
 using Microsoft.AspNetCore.Mvc;
 
@@ -17,20 +16,17 @@ namespace API.Controllers
 		[HttpGet]
 		public IActionResult Index()
 		{
-			return View();
-		}
-
-		[HttpGet]
-		public async Task<IActionResult> UserProfile(string id)
-		{
-			User user = await userService.GetById(id);
-
-			if (user != null)
+			IEnumerable<ProfileInfoViewModel> users;
+			if (User.Identity.IsAuthenticated)
 			{
-				ProfileInfoViewModel profile = userService.GetProfileInfo(user); 
-				return View(profile);
+				users = userService.GetAllUsers().Where(u => u.Email != User.Identity.Name).Select(u => userService.GetProfileInfo(u));
 			}
-			return NotFound();
+			else
+			{
+				users = userService.GetAllUsers().Select(u => userService.GetProfileInfo(u));
+			}
+
+			return View(users);
 		}
 	}
 }

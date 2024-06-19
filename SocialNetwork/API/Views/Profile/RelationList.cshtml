@@ -1,0 +1,38 @@
+@model IEnumerable<ProfileInfoViewModel>
+@{
+    Layout = "_Layout";
+}
+
+@if (Model.Count() == 0)
+{
+    <h2>Список пуст</h2>
+}
+
+<table class="table table-striped table-bordered">
+    @foreach (var profile in Model)
+    {
+        <tr>
+            <td>
+                <h4 class="text-center">
+                    <a asp-action="ProfileInfo" asp-route-id="@profile.Id">
+                        @profile.Name @profile.Surname
+                    </a>
+                </h4>
+            </td>
+            <td>
+                @if (profile.RelationType == Logic.Enums.RelationType.Following)
+                {
+                    <form asp-action="AddToFriends" asp-route-id="@profile.Id">
+                        <button type="submit" class="btn btn-outline-secondary">Добавить в друзья</button>
+                    </form>
+                }
+                else if (profile.RelationType == Logic.Enums.RelationType.Friend)
+                {
+                    <form asp-action="RemoveFromFriends" asp-route-id="@profile.Id">
+                        <button type="submit" class="btn btn-outline-secondary">Удалить из друзей</button>
+                    </form>
+                }
+            </td>
+        </tr>
+    }
+</table>
