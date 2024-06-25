@@ -1,7 +1,7 @@
+using System.Web;
 using Application.Options;
 using Application.Services;
 using Logic.Models;
-using Logic.ViewModels;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
@@ -12,33 +12,47 @@ namespace API.Controllers
     public class PhotoController : Controller
     {
         private readonly FileService fileService;
-
+        private readonly ReactionsService reactionsService;
         private readonly UserService userService;
+        private readonly NotificationsService notificationService;
+        private readonly CommentsService commentsService;
 
-        public PhotoController(FileService _fileService, UserService usrService)
+        public PhotoController(FileService _fileService, UserService usrService, ReactionsService _reactionService,
+        NotificationsService _notificationService, CommentsService _commentsService)
         {
             fileService = _fileService;
             userService = usrService;
+            reactionsService = _reactionService;
+            notificationService = _notificationService;
+            commentsService = _commentsService;
         }
 
         [HttpGet]
-        public async Task<IActionResult> PhotoInfo(int? id)
+        public async Task<IActionResult> PhotoInfo(int? photoId, string? userId)
         {
-            if (id == null)
+            if (photoId == null || userId == null)
             {
                 return NotFound();
             }
 
-            var user = await userService.Get(User);
-            var photo = fileService.GetById((int)id);
+            var user = await userService.GetById(userId);
+            var ownUser = await userService.Get(User);
+
+            var photo = fileService.GetById((int)photoId);
 
             if (user.Id != photo.UserId)
             {
                 return RedirectToAction("Index", "Home");
             }
-            
-            var photoInfo = fileService.CreatePhotoInfo(photo);
-            return View(photoInfo);
+
+            var photoInfo = await fileService.CreatePhotoInfo(photo);
+
+            if (user.Id == ownUser.Id)
+            {
+                return View("MyPhotoInfo", photoInfo);
+            }
+
+            return View("UserPhotoInfo", photoInfo);
         }
 
         [HttpPost]
@@ -99,6 +113,45 @@ namespace API.Controllers
                 }
             }
             return View();
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> MakeReaction(int? photoId, int? reactionId, string? userId)
+        {
+            if (photoId == null || reactionId == null || userId.IsNullOrEmpty())
+            {
+                return NotFound();
+            }
+
+            var ownUser = await userService.Get(User);
+            var user = await userService.GetById(userId);
+
+            var photo = fileService.GetById((int)photoId);
+            var reaction = reactionsService.GetReactionById((int)reactionId);
+
+            bool sendNotification = reactionsService.MakeReaction(photo, reaction, ownUser);
+
+            if (sendNotification && user.Id != ownUser.Id)
+            {
+                notificationService.MakeReactionToPhoto(ownUser, user, photo, reactionsService.GetLocalizedReactionType(reaction.ReactionType));
+            }
+
+            return RedirectToAction("PhotoInfo", new { photoId = photoId, userId = userId });
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> AddComment(string? commentText, int photoId, string userId)
+        {
+            if (commentText.IsNullOrEmpty())
+            {
+                return BadRequest();
+            }
+
+            var ownUser = await userService.Get(User);
+            var photo = fileService.GetById(photoId);
+            commentsService.AddCommentToPhoto(commentText, ownUser, photo);
+
+            return RedirectToAction("PhotoInfo", new { userId = userId, photoId = photoId });
         }
     }
 }

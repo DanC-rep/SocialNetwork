@@ -37,7 +37,7 @@ namespace API.Controllers
             if (user != null)
             {
                 ProfileInfoViewModel profile = userService.GetProfileInfo(user);
-                SetProfilePhotos(user, profile);
+                await SetProfilePhotos(user, profile);
 
                 if ((User.Identity.IsAuthenticated && user.Email == User.Identity.Name) || isOwnPage)
                 {
@@ -96,7 +96,33 @@ namespace API.Controllers
         public async Task<IActionResult> Notifications()
         {
             User user = await userService.Get(User);
-            return View(notificationsService.GetUserNotifications(user.Id));
+            
+            if (user != null)
+            {
+                return View(notificationsService.GetUserNotifications(user.Id));
+            }
+            
+            return NotFound();
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> DeleteNotification(int? id)
+        {
+            if (id == null)
+            {
+                return NotFound();
+            }
+
+            var user = await userService.Get(User);
+            var notification = notificationsService.GetById((int)id);
+
+            if (user.Id != notification.ReceiverId)
+            {
+                return NotFound();
+            }
+
+            notificationsService.Delete((int)id);
+            return RedirectToAction("Notifications");
         }
 
         [HttpPost]
@@ -215,7 +241,7 @@ namespace API.Controllers
             }
         }
 
-        private void SetProfilePhotos(User user, ProfileInfoViewModel profile)
+        private async Task SetProfilePhotos(User user, ProfileInfoViewModel profile)
         {
             var photoData = fileService.GetUserAvatar(user).Data;
 
@@ -230,7 +256,7 @@ namespace API.Controllers
                 profile.Avatar = Convert.ToBase64String(fileService.ConvertToByteArray(file.OpenReadStream(), file.Length));
             }
 
-            profile.Photos = fileService.GetUserPhotosInfo(user);
+            profile.Photos = await fileService.GetUserPhotosInfo(user);
         }
     }
 }

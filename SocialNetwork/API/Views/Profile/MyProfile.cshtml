@@ -15,7 +15,7 @@
 <div class="user-photos-block">
 	@foreach (var photo in @Model.Photos)
 	{
-		<a asp-action="PhotoInfo" asp-controller="Photo" asp-route-id="@photo.Id">
+		<a asp-action="PhotoInfo" asp-controller="Photo" asp-route-photoId="@photo.Id" asp-route-userId="@Model.Id">
 			<img src="data:image/png;base64, @photo.Data" class="user-icon">
 		</a>
 	}

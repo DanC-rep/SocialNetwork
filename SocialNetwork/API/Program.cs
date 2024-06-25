@@ -33,6 +33,8 @@ builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IUserFilesRepository, UserFilesRepository>();
 builder.Services.AddScoped<INotificationsRepository, NotificationsRepository>();
 builder.Services.AddScoped<IFriendsRepository, FriendsRepository>();
+builder.Services.AddScoped<IReactionsRepository, ReactionsRepository>();
+builder.Services.AddScoped<ICommentsRepository, CommentsRepository>();
 
 builder.Services.AddScoped<UserService>();
 builder.Services.AddScoped<RoleService>();
@@ -41,6 +43,8 @@ builder.Services.AddScoped<PasswordService>();
 builder.Services.AddScoped<FileService>();
 builder.Services.AddScoped<NotificationsService>();
 builder.Services.AddScoped<FriendsService>();
+builder.Services.AddScoped<ReactionsService>();
+builder.Services.AddScoped<CommentsService>();
 
 builder.Services.AddTransient<ISendEmail, EmailSender>();
 

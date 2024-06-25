@@ -1,0 +1,48 @@
+@model PhotoInfo
+@{
+    Layout = "_Layout";
+}
+
+<img src="data:image/png;base64, @Model.Data" class="user-avatar" aria-colspan="photo-info">
+
+<ul class="list-group list-group-horizontal">
+    @foreach (var reaction in Model.ReactionsInfo)
+    {
+        <li class="list-group-item text-center" style="border: none">
+            <form asp-action="MakeReaction" method="post">
+                <input type="hidden" name="photoId" value="@Model.Id">
+                <input type="hidden" name="reactionId" value="@reaction.Id">
+                <input type="hidden" name="userId" value="@Model.UserId">
+                <button type="submit" class="reaction-button">
+                    <img src="~/@reaction.Path" alt="@reaction.ReactionType" class="reaction-icon">
+                </button>
+            </form>
+            <p>@reaction.ReactionsCount</p>
+        </li>
+    }
+</ul>
+<form asp-action="AddComment" method="post">
+    <div asp-validation-summary="All" class="text-danger"></div>
+    <h3>Оставьте комментарий</h3>
+    <input type="hidden" name="photoId" value="@Model.Id">
+    <input type="hidden" name="userId" value="@Model.UserId">
+    <div class="form-group">
+        <textarea name="commentText" class="form-control" required style="white-space: pre-wrap"></textarea>
+    </div><br>
+    <button type="submit" class="btn btn-outline-primary">Оставить комментарий</button>
+</form>
+
+<h3>Комментарии пользователей (@Model.CommentsInfo.Count())</h3>
+@foreach (var comment in Model.CommentsInfo)
+{
+    <div style="width: 50%">
+        <hr>
+        <h5>
+            <a asp-action="ProfileInfo" asp-controller="Profile" asp-route-id="@comment.UserId">
+                @comment.UserName @comment.UserSurname
+            </a>
+            <span class="comment-publish-date">@comment.PublishDate</span>
+        </h5>
+        <p style="white-space: pre-wrap">@comment.CommentText</p>
+    </div>
+}

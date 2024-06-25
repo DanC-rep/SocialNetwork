@@ -8,10 +8,15 @@ namespace Application.Services
     public class FileService
     {
         private readonly IUserFilesRepository userFilesRepository;
+        private readonly ReactionsService reactionsService;
+        private readonly CommentsService commentsService;
 
-        public FileService(IUserFilesRepository _usrFilesRepo)
+        public FileService(IUserFilesRepository _usrFilesRepo, ReactionsService _reactionsService, 
+        CommentsService _commentsService)
         {
             userFilesRepository = _usrFilesRepo;
+            reactionsService = _reactionsService;
+            commentsService = _commentsService;
         }
 
         public string GetFileExtension(string fileName)
@@ -30,7 +35,7 @@ namespace Application.Services
                 ContentType = mimeType,
                 Data = ConvertToByteArray(stream, length),
                 IsAvatar = isAvatar,
-                User = user
+                User = user,
             };
         }
 
@@ -60,10 +65,18 @@ namespace Application.Services
             return userFilesRepository.GetUserAvatar(user) ?? new FileModel();
         }
 
-        public IEnumerable<PhotoInfo> GetUserPhotosInfo(User user)
+        public async Task<IEnumerable<PhotoInfo>> GetUserPhotosInfo(User user)
         {
             var fileModels = userFilesRepository.GetUserPhotos(user);
-            return fileModels.Select(f => CreatePhotoInfo(f));
+            var photosInfo = new List<PhotoInfo>();
+
+            foreach (var file in fileModels)
+            {
+                var photoInfo = await CreatePhotoInfo(file);
+                photosInfo.Add(photoInfo);
+            }
+
+            return photosInfo;
         }
 
         public MemoryStream OpenDefaultImage()
@@ -75,12 +88,15 @@ namespace Application.Services
             return memoryStream;
         }
 
-        public PhotoInfo CreatePhotoInfo(FileModel model)
+        public async Task<PhotoInfo> CreatePhotoInfo(FileModel model)
         {
             return new PhotoInfo
             {
                 Id = model.Id,
-                Data = Convert.ToBase64String(model.Data)
+                Data = Convert.ToBase64String(model.Data),
+                UserId = model.UserId,
+                ReactionsInfo = reactionsService.GetPhotoReactions(model),
+                CommentsInfo =  await commentsService.GetPhotoComments(model.Id)
             };
         }
 

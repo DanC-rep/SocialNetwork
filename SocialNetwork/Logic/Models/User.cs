@@ -17,5 +17,6 @@ namespace Logic.Models
 		public Gender Gender { get; set; } = Gender.Secret;
 
 		public ICollection<FileModel> Files { get; set; }
+		public ICollection<Comment> Comments { get; set; }
 	}
 }

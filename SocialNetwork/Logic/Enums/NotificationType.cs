@@ -4,7 +4,7 @@ namespace Logic.Enums
     {
         FriendRequest,
         FriendRequestApproved,
-        PhotoLike,
+        PhotoReaction,
         PhotoComment
     }
 }

@@ -13,14 +13,11 @@ namespace Application.Services
             repository = repo;
         }
 
-        public void SendFriendRequest(User sender, User receiver)
+        private void CreateNotification(string description, User sender, User receiver, NotificationType notificationType)
         {
-            var link = $"<a href=\"/Profile/ProfileInfo/{sender.Id}\">{sender.Name}</a>";
-            var description = $"Пользователь {link} хочет добавить вас в друзья";
-
             var notification = new Notification
             {
-                NotificationType = NotificationType.FriendRequest,
+                NotificationType = notificationType,
                 CreationDate = DateTime.Now,
                 Description = description,
                 Sender = sender,
@@ -30,21 +27,30 @@ namespace Application.Services
             repository.Add(notification);
         }
 
+        public void SendFriendRequest(User sender, User receiver)
+        {
+            var link = $"<a href=\"/Profile/ProfileInfo/{sender.Id}\">{sender.Name}</a>";
+            var description = $"Пользователь {link} хочет добавить вас в друзья";
+
+            CreateNotification(description, sender, receiver, NotificationType.FriendRequest);
+        }
+
         public void ApproveFriendRequest(User sender, User receiver)
         {
             var link = $"<a href=\"/Profile/ProfileInfo/{sender.Id}\">{sender.Name}</a>";
             var description = $"Пользователь {link} подтвердил вашу заявку в друзья";
 
-            var notification = new Notification
-            {
-                NotificationType = NotificationType.FriendRequestApproved,
-                CreationDate = DateTime.Now,
-                Description = description,
-                Sender = sender,
-                Receiver = receiver
-            };
+            CreateNotification(description, sender, receiver, NotificationType.FriendRequestApproved);
+        }
 
-            repository.Add(notification);
+        public void MakeReactionToPhoto(User sender, User receiver, FileModel photo, string reaction)
+        {
+            var usrLink = $"<a href=\"/Profile/ProfileInfo/{sender.Id}\">{sender.Name}</a>";
+            var photoLink = $"<a href=\"/Photo/PhotoInfo?photoId={photo.Id}&userId={receiver.Id}\">фото</a>";
+
+            var description = $"Пользователь {usrLink} поставил реакцию \"{reaction}\" на ваше {photoLink}";
+
+            CreateNotification(description, sender, receiver, NotificationType.PhotoReaction);
         }
 
         public IEnumerable<Notification> GetUserNotifications(string id)

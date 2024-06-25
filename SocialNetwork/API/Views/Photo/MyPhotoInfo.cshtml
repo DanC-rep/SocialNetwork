@@ -1,0 +1,45 @@
+@model PhotoInfo
+@{
+    Layout = "_Layout";
+}
+
+<img src="data:image/png;base64, @Model.Data" class="user-avatar" aria-colspan="photo-info">
+
+<ul class="list-group list-group-horizontal">
+    @foreach (var reaction in Model.ReactionsInfo)
+    {
+        <li class="list-group-item text-center" style="border: none">
+            <form asp-action="MakeReaction" method="post">
+                <input type="hidden" name="photoId" value="@Model.Id">
+                <input type="hidden" name="reactionId" value="@reaction.Id">
+                <input type="hidden" name="userId" value="@Model.UserId">
+                <button type="submit" class="reaction-button">
+                    <img src="~/@reaction.Path" alt="@reaction.ReactionType" class="reaction-icon">
+                </button>
+            </form>
+            <p>@reaction.ReactionsCount</p>
+        </li>
+    }
+</ul>
+
+<form asp-action="DeletePhoto" method="post" asp-route-id="@Model.Id">
+    <button type="submit" class="btn btn-outline-danger">Удалить фото</button>
+</form>
+<form asp-action="MakeNewAvatar" method="post" asp-route-id="@Model.Id">
+    <button type="submit" class="btn btn-outline-primary">Сделать главным</button>
+</form>
+
+<h3>Комментарии пользователей (@Model.CommentsInfo.Count())</h3>
+@foreach (var comment in Model.CommentsInfo)
+{
+    <div style="width: 50%">
+        <hr>
+        <h5>
+            <p style="font-style: italic">@comment.PublishDate</p>
+            <a asp-action="ProfileInfo" asp-controller="Profile" asp-route-id="@comment.UserId">
+                @comment.UserName @comment.UserSurname
+            </a>
+        </h5>
+        <span class="comment-publish-date">@comment.PublishDate</span>
+    </div>
+}

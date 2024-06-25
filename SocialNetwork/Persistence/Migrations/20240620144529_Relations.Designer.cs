@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Persistence;
 
@@ -11,9 +12,11 @@ using Persistence;
 namespace Persistence.Migrations
 {
     [DbContext(typeof(NetworkDbContext))]
-    partial class NetworkDbContextModelSnapshot : ModelSnapshot
+    [Migration("20240620144529_Relations")]
+    partial class Relations
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -21,47 +24,6 @@ namespace Persistence.Migrations
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
-
-            modelBuilder.Entity("Logic.Models.Comment", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<DateTime>("PublishDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("Text")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("UserId")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(450)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("UserId");
-
-                    b.ToTable("Comments");
-                });
-
-            modelBuilder.Entity("Logic.Models.CommentPhoto", b =>
-                {
-                    b.Property<int>("CommentId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("FileId")
-                        .HasColumnType("int");
-
-                    b.HasKey("CommentId", "FileId");
-
-                    b.HasIndex("FileId");
-
-                    b.ToTable("PhotosComments");
-                });
 
             modelBuilder.Entity("Logic.Models.FileModel", b =>
                 {
@@ -176,43 +138,43 @@ namespace Persistence.Migrations
                         new
                         {
                             Id = 1,
-                            Path = "images/like.png",
+                            Path = "~/images/like.png",
                             ReactionType = 0
                         },
                         new
                         {
                             Id = 2,
-                            Path = "images/dislike.png",
+                            Path = "~/images/dislike.png",
                             ReactionType = 1
                         },
                         new
                         {
                             Id = 3,
-                            Path = "images/angry.png",
+                            Path = "~/images/angry.png",
                             ReactionType = 3
                         },
                         new
                         {
                             Id = 4,
-                            Path = "images/heart.png",
+                            Path = "~/images/heart.png",
                             ReactionType = 2
                         },
                         new
                         {
                             Id = 5,
-                            Path = "images/cry.png",
+                            Path = "~/images/cry.png",
                             ReactionType = 5
                         },
                         new
                         {
                             Id = 6,
-                            Path = "images/laugh.png",
+                            Path = "~/images/laugh.png",
                             ReactionType = 4
                         },
                         new
                         {
                             Id = 7,
-                            Path = "images/surprised.png",
+                            Path = "~/images/surprised.png",
                             ReactionType = 6
                         });
                 });
@@ -223,6 +185,9 @@ namespace Persistence.Migrations
                         .HasColumnType("nvarchar(450)");
 
                     b.Property<int>("FileId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("Count")
                         .HasColumnType("int");
 
                     b.Property<int>("ReactionId")
@@ -460,35 +425,6 @@ namespace Persistence.Migrations
                     b.ToTable("AspNetUserTokens", (string)null);
                 });
 
-            modelBuilder.Entity("Logic.Models.Comment", b =>
-                {
-                    b.HasOne("Logic.Models.User", "User")
-                        .WithMany("Comments")
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("User");
-                });
-
-            modelBuilder.Entity("Logic.Models.CommentPhoto", b =>
-                {
-                    b.HasOne("Logic.Models.Comment", "Comment")
-                        .WithMany()
-                        .HasForeignKey("CommentId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("Logic.Models.FileModel", "File")
-                        .WithMany()
-                        .HasForeignKey("FileId")
-                        .IsRequired();
-
-                    b.Navigation("Comment");
-
-                    b.Navigation("File");
-                });
-
             modelBuilder.Entity("Logic.Models.FileModel", b =>
                 {
                     b.HasOne("Logic.Models.User", "User")
@@ -505,11 +441,13 @@ namespace Persistence.Migrations
                     b.HasOne("Logic.Models.User", "Friend")
                         .WithMany()
                         .HasForeignKey("FriendId")
+                        .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 
                     b.HasOne("Logic.Models.User", "User")
                         .WithMany()
                         .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 
                     b.Navigation("Friend");
@@ -522,11 +460,13 @@ namespace Persistence.Migrations
                     b.HasOne("Logic.Models.User", "Receiver")
                         .WithMany()
                         .HasForeignKey("ReceiverId")
+                        .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 
                     b.HasOne("Logic.Models.User", "Sender")
                         .WithMany()
                         .HasForeignKey("SenderId")
+                        .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 
                     b.Navigation("Receiver");
@@ -612,8 +552,6 @@ namespace Persistence.Migrations
 
             modelBuilder.Entity("Logic.Models.User", b =>
                 {
-                    b.Navigation("Comments");
-
                     b.Navigation("Files");
                 });
 #pragma warning restore 612, 618
